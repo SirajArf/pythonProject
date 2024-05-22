@@ -8,7 +8,6 @@ client = MongoClient('localhost', 27017)
 db = client.todo_database
 todos = db.todos
 
-
 @app.route('/', methods=['GET','POST'])
 @app.route('/<todo_id>', methods=['GET','POST'])
 def index(todo_id=None):
@@ -17,24 +16,27 @@ def index(todo_id=None):
         if todo_id is None:
             todos.insert_one({'content': content})
         else:
-            todo = todos.find_one({"_id":ObjectId(todo_id)})
-            if todo:
-                content = request.form['content']
-                db.todos.update_one({"_id": ObjectId(todo_id)},
-                                    {"$set":{'content': content}})        
-                                    
-
-                return redirect(url_for('index'))
+            if ObjectId.is_valid(todo_id):  
+                todo = todos.find_one({"_id": ObjectId(todo_id)})
+                if todo:
+                    content = request.form['content']
+                    db.todos.update_one({"_id": ObjectId(todo_id)},
+                                        {"$set":{'content': content}})
+                    return redirect(url_for('index'))
+            else:
+                return "Invalid todo_id"
     
     todo = None
     if todo_id is not None:
-        todo = todos.find_one({"_id":ObjectId(todo_id)})
+        if ObjectId.is_valid(todo_id):  
+            todo = todos.find_one({"_id": ObjectId(todo_id)})
+        else:
+            return "Invalid todo_id"
     all_todos = todos.find()
 
     return render_template('index.html',todos = all_todos,todo = todo)
 
-
-
+#delete route
 @app.route('/<id>/delete/',methods=['GET','POST'])
 def delete(id):
       if request.method == 'POST':
