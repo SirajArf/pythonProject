@@ -10,19 +10,29 @@ todos = db.todos
 
 
 @app.route('/', methods=['GET','POST'])
-def index():
+@app.route('/<todo_id>', methods=['GET','POST'])
+def index(todo_id=None):
     if request.method == 'POST':
         content = request.form['content']
-        todos.insert_one({'content': content})
-        return redirect(url_for('index'))
+        if todo_id is None:
+            todos.insert_one({'content': content})
+        else:
+            todo = todos.find_one({"_id":ObjectId(todo_id)})
+            if todo:
+                content = request.form['content']
+                db.todos.update_one({"_id": ObjectId(todo_id)},
+                                    {"$set":{'content': content}})        
+                                    
 
+                return redirect(url_for('index'))
+    
+    todo = None
+    if todo_id is not None:
+        todo = todos.find_one({"_id":ObjectId(todo_id)})
     all_todos = todos.find()
 
-    return render_template('index.html',todos = all_todos)
+    return render_template('index.html',todos = all_todos,todo = todo)
 
-# @app.route('/<id>/edit', methods=['GET','POST'])
-# def edit(id):
-#     if request.meyhod == 'POST':
 
 
 @app.route('/<id>/delete/',methods=['GET','POST'])
