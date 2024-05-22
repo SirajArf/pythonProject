@@ -16,7 +16,8 @@ def index(todo_id=None):
         if todo_id is None:
             todos.insert_one({'content': content})
         else:
-            if ObjectId.is_valid(todo_id):  
+            if ObjectId.is_valid(todo_id): 
+                # print(type(todo_id)) 
                 todo = todos.find_one({"_id": ObjectId(todo_id)})
                 if todo:
                     content = request.form['content']
