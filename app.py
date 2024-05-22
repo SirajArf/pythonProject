@@ -33,7 +33,7 @@ def index(todo_id=None):
             todo = todos.find_one({"_id": ObjectId(todo_id)})
         else:
             return "Invalid todo_id"
-    all_todos = todos.find()
+    all_todos = todos.find().sort({"_id" : -1})
 
     return render_template('index.html',todos = all_todos,todo = todo)
 
